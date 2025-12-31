@@ -1,106 +1,472 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Trash Dashboard</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗑️ Smart Trash Monitor</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        h1 { color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
-        .card { background: #f7fafc; padding: 25px; border-radius: 15px; margin-bottom: 20px; border-left: 5px solid; }
-        .card.full { border-left-color: #e53e3e; background: #fff5f5; }
-        .card.ok { border-left-color: #38a169; background: #f0fff4; }
-        .status { font-size: 28px; font-weight: bold; margin: 10px 0; }
-        .json { background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto; }
-        .loading { text-align: center; padding: 40px; color: #718096; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 2.2rem;
+        }
+        
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        
+        .card {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #4299e1;
+        }
+        
+        .card.full {
+            border-left-color: #e53e3e;
+            background: #fff5f5;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+        
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .status-badge {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .badge-full {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .badge-ok {
+            background: #c6f6d5;
+            color: #276749;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .json-display {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+        
+        .fa-spin {
+            animation: fa-spin 2s infinite linear;
+        }
+        
+        @keyframes fa-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .connection-status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #edf2f7;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .status-online {
+            background: #38a169;
+        }
+        
+        .status-offline {
+            background: #e53e3e;
+        }
+        
+        .status-connecting {
+            background: #d69e2e;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .timestamp {
+            text-align: center;
+            margin-top: 30px;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        .connection-method {
+            background: #e6fffa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #234e52;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1>🗑️ Smart Trash Monitor</h1>
+        <h1><i class="fas fa-trash-alt"></i> Smart Trash Monitor</h1>
+        <p class="subtitle">Real-time monitoring with JSONP - No CORS issues!</p>
         
-        <div id="statusCard" class="card">
-            <div class="loading">
-                <div style="font-size: 24px;">⏳</div>
-                <p>Connecting to ESP32...</p>
+        <div class="dashboard">
+            <div id="statusCard" class="card">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Connecting to ESP32...</p>
+                    <div class="connection-method">
+                        <i class="fas fa-info-circle"></i>
+                        Using JSONP method to bypass CORS restrictions
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <div class="card">
-            <h3>Raw Data</h3>
-            <div class="json">
-                <pre id="jsonData">Waiting for data...</pre>
+            
+            <div class="card">
+                <h3><i class="fas fa-code"></i> Raw JSON Data</h3>
+                <div id="jsonData" class="json-display">
+                    Waiting for data...
+                </div>
             </div>
-        </div>
-        
-        <div style="text-align: center; margin-top: 20px; color: #718096;">
-            <p>Auto-refreshes every 3 seconds</p>
-            <p id="lastUpdate">Last update: Never</p>
+            
+            <div class="connection-status">
+                <div id="statusDot" class="status-dot status-connecting"></div>
+                <span id="statusText">Connecting via JSONP...</span>
+            </div>
+            
+            <div class="timestamp">
+                <i class="fas fa-clock"></i>
+                <span id="lastUpdate">Last update: Never</span>
+            </div>
         </div>
     </div>
     
     <script>
-        // GitHub Pages works with ngrok directly!
-        const API_URL = "https://zachariah-multiphasic-unidiomatically.ngrok-free.dev/api/trash-data";
+        // ===== CONFIGURATION =====
+        const CONFIG = {
+            NGrokURL: "https://zachariah-multiphasic-unidiomatically.ngrok-free.dev",
+            UpdateInterval: 3000,
+            RetryDelay: 2000,
+            MaxRetries: 3
+        };
         
-        async function fetchData() {
+        // ===== JSONP FUNCTION =====
+        function fetchDataJSONP() {
+            return new Promise((resolve, reject) => {
+                // Generate unique callback name
+                const callbackName = 'jsonp_callback_' + Date.now() + '_' + Math.random().toString(36).substr(2);
+                
+                // Create script element
+                const script = document.createElement('script');
+                script.src = `${CONFIG.NGrokURL}/api/trash-data?callback=${callbackName}`;
+                script.async = true;
+                
+                // Define callback function
+                window[callbackName] = function(data) {
+                    // Clean up
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    
+                    // Return data
+                    resolve(data);
+                };
+                
+                // Handle errors
+                script.onerror = function() {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    reject(new Error('JSONP request failed'));
+                };
+                
+                // Add timeout
+                setTimeout(() => {
+                    if (window[callbackName]) {
+                        delete window[callbackName];
+                        document.body.removeChild(script);
+                        reject(new Error('JSONP timeout'));
+                    }
+                }, 10000);
+                
+                // Execute request
+                document.body.appendChild(script);
+            });
+        }
+        
+        // ===== REGULAR FETCH (FALLBACK) =====
+        async function fetchDataRegular() {
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(`${CONFIG.NGrokURL}/api/trash-data`, {
                     headers: { 'Accept': 'application/json' }
                 });
                 
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
                 
-                const data = await response.json();
-                
-                // Update status card
-                const statusCard = document.getElementById('statusCard');
-                statusCard.className = data.bin_full ? 'card full' : 'card ok';
-                statusCard.innerHTML = `
-                    <h2>Bin Status</h2>
-                    <div class="status">${data.bin_full ? '🚨 FULL' : '✅ OK'}</div>
-                    <p><strong>Distance:</strong> ${data.distance} cm</p>
-                    <p><strong>Trash Type:</strong> ${data.trash_type}</p>
-                    <p><strong>Confidence:</strong> ${data.confidence}%</p>
-                    <p><strong>Device ID:</strong> ${data.device_id}</p>
-                    <p><strong>Measurement #:</strong> ${data.measurement_id}</p>
-                `;
-                
-                // Update JSON
-                document.getElementById('jsonData').textContent = 
-                    JSON.stringify(data, null, 2);
-                
-                // Update timestamp
-                const now = new Date().toLocaleTimeString();
-                document.getElementById('lastUpdate').textContent = 
-                    `Last update: ${now}`;
-                    
+                return await response.json();
             } catch (error) {
-                document.getElementById('statusCard').innerHTML = `
-                    <div style="color: #e53e3e;">
-                        <h2>❌ Connection Error</h2>
-                        <p>${error.message}</p>
-                        <p>Make sure:</p>
-                        <ol style="text-align: left; margin: 10px 20px;">
-                            <li>ESP32 is running</li>
-                            <li>ngrok is active</li>
-                            <li>Flask server is running</li>
-                        </ol>
-                    </div>
-                `;
+                throw error;
             }
         }
         
-        // Initial fetch
-        fetchData();
+        // ===== UPDATE DISPLAY =====
+        function updateDisplay(data) {
+            // Update status card
+            const statusCard = document.getElementById('statusCard');
+            const isFull = data.bin_full;
+            
+            statusCard.className = isFull ? 'card full' : 'card';
+            statusCard.innerHTML = `
+                <div class="status-header">
+                    <h2><i class="fas fa-trash"></i> Bin Status</h2>
+                    <span class="status-badge ${isFull ? 'badge-full' : 'badge-ok'}">
+                        ${isFull ? 'FULL 🚨' : 'OK ✅'}
+                    </span>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label"><i class="fas fa-ruler"></i> Distance</div>
+                        <div class="stat-value">${data.distance} cm</div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-label"><i class="fas fa-recycle"></i> Trash Type</div>
+                        <div class="stat-value">${data.trash_type}</div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-label"><i class="fas fa-chart-line"></i> Confidence</div>
+                        <div class="stat-value">${data.confidence}%</div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-label"><i class="fas fa-id-card"></i> Device ID</div>
+                        <div class="stat-value">${data.device_id}</div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-label"><i class="fas fa-hashtag"></i> Measurement #</div>
+                        <div class="stat-value">${data.measurement_id}</div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-label"><i class="fas fa-clock"></i> Last Update</div>
+                        <div class="stat-value">${data.last_update}</div>
+                    </div>
+                </div>
+            `;
+            
+            // Update JSON display
+            document.getElementById('jsonData').textContent = 
+                JSON.stringify(data, null, 2);
+            
+            // Update status
+            document.getElementById('statusDot').className = 'status-dot status-online';
+            document.getElementById('statusText').textContent = 
+                `Connected via JSONP • Updated: ${new Date().toLocaleTimeString()}`;
+            
+            // Update timestamp
+            document.getElementById('lastUpdate').textContent = 
+                `Last update: ${new Date().toLocaleTimeString()}`;
+        }
         
-        // Update every 3 seconds
-        setInterval(fetchData, 3000);
+        // ===== SHOW ERROR =====
+        function showError(message, method) {
+            document.getElementById('statusCard').innerHTML = `
+                <div style="text-align: center; padding: 30px;">
+                    <i class="fas fa-exclamation-triangle" style="color: #e53e3e; font-size: 48px; margin-bottom: 20px;"></i>
+                    <h2 style="color: #c53030;">Connection Error</h2>
+                    <p style="margin: 10px 0;">${message}</p>
+                    <p style="margin: 10px 0; color: #718096;">Method: ${method}</p>
+                    <div style="background: #fff5f5; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: left;">
+                        <p><strong>Try:</strong></p>
+                        <ol style="margin-left: 20px;">
+                            <li>Check ESP32 is running</li>
+                            <li>Verify ngrok is active</li>
+                            <li>Refresh this page</li>
+                            <li>Check Flask server logs</li>
+                        </ol>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('statusDot').className = 'status-dot status-offline';
+            document.getElementById('statusText').textContent = `Disconnected • ${message}`;
+            document.getElementById('jsonData').textContent = `Error: ${message}\nMethod: ${method}`;
+        }
         
-        // Manual refresh button (optional)
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'r' || e.key === 'R') fetchData();
+        // ===== MAIN FETCH FUNCTION =====
+        let retryCount = 0;
+        
+        async function fetchData() {
+            try {
+                console.log(`Attempt ${retryCount + 1}: Trying JSONP...`);
+                
+                // Try JSONP first (works with GitHub Pages)
+                const data = await fetchDataJSONP();
+                
+                updateDisplay(data);
+                retryCount = 0; // Reset retry count on success
+                
+            } catch (jsonpError) {
+                console.log('JSONP failed, trying regular fetch...');
+                
+                try {
+                    // Fallback to regular fetch
+                    const data = await fetchDataRegular();
+                    updateDisplay(data);
+                    retryCount = 0;
+                    
+                } catch (fetchError) {
+                    retryCount++;
+                    
+                    if (retryCount <= CONFIG.MaxRetries) {
+                        console.log(`Retry ${retryCount}/${CONFIG.MaxRetries} in ${CONFIG.RetryDelay}ms...`);
+                        showError(`${fetchError.message} (Retry ${retryCount}/${CONFIG.MaxRetries})`, 'JSONP -> Fetch');
+                        
+                        // Retry after delay
+                        setTimeout(fetchData, CONFIG.RetryDelay);
+                    } else {
+                        showError(`${fetchError.message} - All methods failed`, 'JSONP & Fetch');
+                        console.error('All connection methods failed:', fetchError);
+                    }
+                }
+            }
+        }
+        
+        // ===== INITIALIZE =====
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Smart Trash Monitor initialized');
+            console.log('API URL:', CONFIG.NGrokURL);
+            console.log('Using JSONP method for GitHub Pages');
+            
+            // Initial fetch
+            fetchData();
+            
+            // Set up periodic updates
+            setInterval(fetchData, CONFIG.UpdateInterval);
+            
+            // Manual refresh on spacebar
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' || e.code === 'KeyR') {
+                    e.preventDefault();
+                    fetchData();
+                }
+            });
+            
+            // Export for debugging
+            window.debug = {
+                refresh: fetchData,
+                testJSONP: fetchDataJSONP,
+                testFetch: fetchDataRegular
+            };
         });
     </script>
 </body>

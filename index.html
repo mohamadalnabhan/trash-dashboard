@@ -2,82 +2,116 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🗑️ Smart Trash Monitor</title>
     <style>
+        /* Mobile-first responsive design */
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #38a169;
+            --danger: #e53e3e;
+            --warning: #d69e2e;
+            --light: #f7fafc;
+            --dark: #2d3748;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             min-height: 100vh;
-            color: #333;
-            padding: 20px;
+            color: var(--dark);
+            padding: 15px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
         .container {
-            max-width: 900px;
+            max-width: 100%;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
         }
         
         h1 {
-            color: #2d3748;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 5px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            font-size: 2.2rem;
+            justify-content: center;
+            gap: 10px;
         }
         
         .subtitle {
             color: #718096;
-            margin-bottom: 30px;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
         }
         
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
+        .mobile-warning {
+            background: #feebc8;
+            color: #744210;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        .card {
-            background: #f7fafc;
+        /* Status Card */
+        .status-card {
+            background: var(--light);
             border-radius: 15px;
-            padding: 25px;
-            border-left: 5px solid #4299e1;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary);
+            transition: all 0.3s ease;
         }
         
-        .card.full {
-            border-left-color: #e53e3e;
+        .status-card.full {
+            border-left-color: var(--danger);
             background: #fff5f5;
             animation: pulse 2s infinite;
         }
         
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.8; }
-            100% { opacity: 1; }
+            0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(229, 62, 62, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); }
         }
         
         .status-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .status-badge {
-            padding: 8px 20px;
+            padding: 6px 15px;
             border-radius: 20px;
             font-weight: bold;
+            font-size: 0.85rem;
             text-transform: uppercase;
         }
         
@@ -93,85 +127,63 @@
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
         }
         
         .stat-item {
             background: white;
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        
+        .stat-icon {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--primary);
         }
         
         .stat-label {
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             color: #718096;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: bold;
-            color: #2d3748;
+            color: var(--dark);
         }
         
-        .json-display {
-            background: #1a202c;
-            color: #e2e8f0;
-            padding: 20px;
-            border-radius: 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            word-break: break-all;
-            margin-top: 20px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #718096;
-        }
-        
-        .fa-spin {
-            animation: fa-spin 2s infinite linear;
-        }
-        
-        @keyframes fa-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
+        /* Connection Status */
         .connection-status {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 8px;
-            background: #edf2f7;
             display: flex;
             align-items: center;
             gap: 10px;
+            padding: 12px;
+            background: #edf2f7;
+            border-radius: 10px;
+            margin: 15px 0;
         }
         
         .status-dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
+            flex-shrink: 0;
         }
         
-        .status-online {
-            background: #38a169;
-        }
-        
-        .status-offline {
-            background: #e53e3e;
-        }
-        
-        .status-connecting {
-            background: #d69e2e;
-            animation: blink 1s infinite;
+        .status-online { background: var(--success); }
+        .status-offline { background: var(--danger); }
+        .status-connecting { 
+            background: var(--warning);
+            animation: blink 1.5s infinite;
         }
         
         @keyframes blink {
@@ -179,152 +191,508 @@
             50% { opacity: 0.3; }
         }
         
-        .timestamp {
+        /* Controls */
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #a0aec0;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        /* JSON Display */
+        .json-container {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 15px 0;
+            max-height: 200px;
+        }
+        
+        .json-display {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        /* Loading */
+        .loading {
             text-align: center;
-            margin-top: 30px;
+            padding: 30px;
             color: #718096;
-            font-size: 0.9rem;
         }
         
-        .connection-method {
-            background: #e6fffa;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #234e52;
+        .spinner {
+            animation: spin 1s linear infinite;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
         }
         
-        @media (max-width: 768px) {
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.8rem;
+        }
+        
+        /* Mobile-specific optimizations */
+        @media (max-width: 360px) {
             .container {
-                padding: 20px;
+                padding: 15px;
             }
             
             h1 {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
             }
             
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                max-width: 600px;
+                padding: 30px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #1a202c;
+            }
+            
+            .container {
+                background: #2d3748;
+                color: #e2e8f0;
+            }
+            
+            h1, .stat-value {
+                color: #e2e8f0;
+            }
+            
+            .stat-item {
+                background: #4a5568;
+            }
+            
+            .connection-status {
+                background: #4a5568;
+            }
+        }
+        
+        /* Prevent text selection on buttons */
+        .btn, .stat-item {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        /* iOS Safari specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+            
+            .container {
+                min-height: -webkit-fill-available;
+            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
 </head>
 <body>
     <div class="container">
-        <h1><i class="fas fa-trash-alt"></i> Smart Trash Monitor</h1>
-        <p class="subtitle">Real-time monitoring with JSONP - No CORS issues!</p>
+        <header>
+            <h1><i class="fas fa-trash-alt"></i> Trash Monitor</h1>
+            <p class="subtitle">Real-time bin monitoring</p>
+            <div class="mobile-warning">
+                <i class="fas fa-mobile-alt"></i>
+                Mobile-optimized • Works offline
+            </div>
+        </header>
         
-        <div class="dashboard">
-            <div id="statusCard" class="card">
+        <main>
+            <!-- Status Display -->
+            <div id="statusCard" class="status-card">
                 <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i>
+                    <i class="fas fa-spinner spinner"></i>
                     <p>Connecting to ESP32...</p>
-                    <div class="connection-method">
-                        <i class="fas fa-info-circle"></i>
-                        Using JSONP method to bypass CORS restrictions
-                    </div>
+                    <p style="font-size: 0.8rem; margin-top: 10px;">Checking mobile connection</p>
                 </div>
             </div>
             
-            <div class="card">
-                <h3><i class="fas fa-code"></i> Raw JSON Data</h3>
-                <div id="jsonData" class="json-display">
-                    Waiting for data...
-                </div>
-            </div>
-            
+            <!-- Connection Status -->
             <div class="connection-status">
                 <div id="statusDot" class="status-dot status-connecting"></div>
-                <span id="statusText">Connecting via JSONP...</span>
+                <span id="statusText">Detecting connection method...</span>
             </div>
             
-            <div class="timestamp">
+            <!-- Controls -->
+            <div class="controls">
+                <button id="refreshBtn" class="btn btn-primary">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button id="reconnectBtn" class="btn btn-secondary">
+                    <i class="fas fa-wifi"></i> Reconnect
+                </button>
+                <button id="methodBtn" class="btn btn-success">
+                    <i class="fas fa-cog"></i> Switch Method
+                </button>
+                <button id="clearBtn" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+            </div>
+            
+            <!-- JSON Data -->
+            <div class="json-container">
+                <pre id="jsonData" class="json-display">Waiting for data...</pre>
+            </div>
+            
+            <!-- Last Update -->
+            <div style="text-align: center; color: #718096; font-size: 0.85rem;">
                 <i class="fas fa-clock"></i>
                 <span id="lastUpdate">Last update: Never</span>
+                <br>
+                <span id="methodInfo" style="font-size: 0.75rem;">Detecting best method...</span>
             </div>
-        </div>
+        </main>
+        
+        <footer>
+            <p>Device: <span id="deviceInfo">Detecting...</span></p>
+            <p>ESP32 → ngrok → Mobile</p>
+            <p id="versionInfo">v1.0 • Mobile Optimized</p>
+        </footer>
     </div>
     
     <script>
         // ===== CONFIGURATION =====
         const CONFIG = {
-            NGrokURL: "https://zachariah-multiphasic-unidiomatically.ngrok-free.dev",
+            NGrokURL: "https://zachariah-multiphasic-unidiomatically.ngrok-free.dev/api/trash-data",
             UpdateInterval: 3000,
+            MaxRetries: 5,
             RetryDelay: 2000,
-            MaxRetries: 3
+            
+            // Connection methods (in order of preference)
+            Methods: ['JSONP', 'Fetch', 'XHR', 'WebSocket'],
+            
+            // Timeouts for each method (ms)
+            Timeouts: {
+                JSONP: 10000,
+                Fetch: 8000,
+                XHR: 8000,
+                WebSocket: 5000
+            }
         };
         
-        // ===== JSONP FUNCTION =====
-        function fetchDataJSONP() {
+        // ===== GLOBAL STATE =====
+        let currentMethod = 'Auto';
+        let retryCount = 0;
+        let lastData = null;
+        let updateTimer = null;
+        let isOnline = navigator.onLine;
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // ===== INITIALIZE =====
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set device info
+            document.getElementById('deviceInfo').textContent = 
+                isMobile ? 'Mobile' : 'Desktop';
+            
+            // Add touch feedback
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('touchstart', function() {
+                    this.style.opacity = '0.7';
+                });
+                btn.addEventListener('touchend', function() {
+                    this.style.opacity = '1';
+                });
+            });
+            
+            // Event listeners
+            document.getElementById('refreshBtn').addEventListener('click', fetchData);
+            document.getElementById('reconnectBtn').addEventListener('click', reconnect);
+            document.getElementById('methodBtn').addEventListener('click', switchMethod);
+            document.getElementById('clearBtn').addEventListener('click', clearData);
+            
+            // Listen for online/offline events
+            window.addEventListener('online', handleOnline);
+            window.addEventListener('offline', handleOffline);
+            
+            // Initial fetch with best method detection
+            detectBestMethod().then(method => {
+                currentMethod = method;
+                updateMethodInfo();
+                fetchData();
+                startAutoUpdates();
+            });
+            
+            // Add pull-to-refresh for mobile
+            setupPullToRefresh();
+        });
+        
+        // ===== METHOD DETECTION =====
+        async function detectBestMethod() {
+            updateStatus('Testing connection methods...', 'connecting');
+            
+            // Test JSONP first (works on most mobile browsers)
+            if (await testMethod('JSONP')) {
+                return 'JSONP';
+            }
+            
+            // Test Fetch
+            if (await testMethod('Fetch')) {
+                return 'Fetch';
+            }
+            
+            // Test XHR
+            if (await testMethod('XHR')) {
+                return 'XHR';
+            }
+            
+            return 'JSONP'; // Default fallback
+        }
+        
+        async function testMethod(method) {
+            try {
+                switch(method) {
+                    case 'JSONP':
+                        await testJSONP();
+                        return true;
+                    case 'Fetch':
+                        await testFetch();
+                        return true;
+                    case 'XHR':
+                        await testXHR();
+                        return true;
+                }
+            } catch (error) {
+                console.log(`${method} test failed:`, error.message);
+                return false;
+            }
+        }
+        
+        // ===== CONNECTION METHODS =====
+        // 1. JSONP Method
+        function fetchJSONP() {
             return new Promise((resolve, reject) => {
-                // Generate unique callback name
-                const callbackName = 'jsonp_callback_' + Date.now() + '_' + Math.random().toString(36).substr(2);
-                
-                // Create script element
-                const script = document.createElement('script');
-                script.src = `${CONFIG.NGrokURL}/api/trash-data?callback=${callbackName}`;
-                script.async = true;
-                
-                // Define callback function
-                window[callbackName] = function(data) {
-                    // Clean up
+                const callbackName = `jsonp_${Date.now()}_${Math.random().toString(36).substr(2)}`;
+                const timeout = setTimeout(() => {
                     delete window[callbackName];
-                    document.body.removeChild(script);
-                    
-                    // Return data
+                    if (script.parentNode) {
+                        document.body.removeChild(script);
+                    }
+                    reject(new Error('JSONP timeout'));
+                }, CONFIG.Timeouts.JSONP);
+                
+                window[callbackName] = function(data) {
+                    clearTimeout(timeout);
+                    delete window[callbackName];
+                    if (script.parentNode) {
+                        document.body.removeChild(script);
+                    }
                     resolve(data);
                 };
                 
-                // Handle errors
-                script.onerror = function() {
+                const script = document.createElement('script');
+                script.src = `${CONFIG.NGrokURL.split('/api')[0]}/api/trash-data?callback=${callbackName}`;
+                script.onerror = () => {
+                    clearTimeout(timeout);
                     delete window[callbackName];
-                    document.body.removeChild(script);
-                    reject(new Error('JSONP request failed'));
+                    reject(new Error('JSONP script error'));
                 };
                 
-                // Add timeout
-                setTimeout(() => {
-                    if (window[callbackName]) {
-                        delete window[callbackName];
-                        document.body.removeChild(script);
-                        reject(new Error('JSONP timeout'));
-                    }
-                }, 10000);
-                
-                // Execute request
                 document.body.appendChild(script);
             });
         }
         
-        // ===== REGULAR FETCH (FALLBACK) =====
-        async function fetchDataRegular() {
-            try {
-                const response = await fetch(`${CONFIG.NGrokURL}/api/trash-data`, {
-                    headers: { 'Accept': 'application/json' }
-                });
+        async function testJSONP() {
+            return fetchJSONP();
+        }
+        
+        // 2. Fetch Method
+        async function fetchRegular() {
+            const response = await fetch(CONFIG.NGrokURL, {
+                headers: { 'Accept': 'application/json' },
+                mode: 'cors',
+                cache: 'no-cache'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+        
+        async function testFetch() {
+            return fetchRegular();
+        }
+        
+        // 3. XHR Method (fallback for older mobile browsers)
+        function fetchXHR() {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.timeout = CONFIG.Timeouts.XHR;
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                xhr.open('GET', CONFIG.NGrokURL, true);
+                xhr.setRequestHeader('Accept', 'application/json');
+                
+                xhr.onload = function() {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            resolve(JSON.parse(xhr.responseText));
+                        } catch (e) {
+                            reject(new Error('Invalid JSON response'));
+                        }
+                    } else {
+                        reject(new Error(`HTTP ${xhr.status}`));
+                    }
+                };
+                
+                xhr.onerror = () => reject(new Error('XHR network error'));
+                xhr.ontimeout = () => reject(new Error('XHR timeout'));
+                
+                xhr.send();
+            });
+        }
+        
+        async function testXHR() {
+            return fetchXHR();
+        }
+        
+        // ===== MAIN FETCH LOGIC =====
+        async function fetchData() {
+            if (!isOnline) {
+                showOfflineError();
+                return;
+            }
+            
+            retryCount++;
+            updateStatus(`Fetching (Attempt ${retryCount})...`, 'connecting');
+            
+            try {
+                let data;
+                
+                switch(currentMethod) {
+                    case 'JSONP':
+                        data = await fetchJSONP();
+                        break;
+                    case 'Fetch':
+                        data = await fetchRegular();
+                        break;
+                    case 'XHR':
+                        data = await fetchXHR();
+                        break;
+                    default:
+                        // Auto-detect: try JSONP first, then Fetch
+                        try {
+                            data = await fetchJSONP();
+                        } catch (e) {
+                            data = await fetchRegular();
+                        }
                 }
                 
-                return await response.json();
+                // Success!
+                lastData = data;
+                retryCount = 0;
+                updateDisplay(data);
+                updateStatus('Connected', 'online');
+                updateTimestamp();
+                
             } catch (error) {
-                throw error;
+                console.error(`${currentMethod} failed:`, error);
+                
+                if (retryCount <= CONFIG.MaxRetries) {
+                    updateStatus(`Retrying in ${CONFIG.RetryDelay/1000}s...`, 'connecting');
+                    setTimeout(fetchData, CONFIG.RetryDelay);
+                } else {
+                    showError(`Connection failed: ${error.message}`);
+                    updateStatus('Disconnected', 'offline');
+                    
+                    // Try to auto-switch method
+                    if (currentMethod === 'JSONP') {
+                        currentMethod = 'Fetch';
+                        updateMethodInfo();
+                        retryCount = 0;
+                        setTimeout(fetchData, 1000);
+                    }
+                }
             }
         }
         
-        // ===== UPDATE DISPLAY =====
+        // ===== UI UPDATES =====
         function updateDisplay(data) {
-            // Update status card
-            const statusCard = document.getElementById('statusCard');
             const isFull = data.bin_full;
+            const statusCard = document.getElementById('statusCard');
             
-            statusCard.className = isFull ? 'card full' : 'card';
+            statusCard.className = isFull ? 'status-card full' : 'status-card';
             statusCard.innerHTML = `
                 <div class="status-header">
-                    <h2><i class="fas fa-trash"></i> Bin Status</h2>
+                    <h2 style="font-size: 1.2rem;">
+                        <i class="fas fa-trash"></i> Bin Status
+                    </h2>
                     <span class="status-badge ${isFull ? 'badge-full' : 'badge-ok'}">
                         ${isFull ? 'FULL 🚨' : 'OK ✅'}
                     </span>
@@ -332,33 +700,39 @@
                 
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <div class="stat-label"><i class="fas fa-ruler"></i> Distance</div>
+                        <div class="stat-icon"><i class="fas fa-ruler"></i></div>
+                        <div class="stat-label">Distance</div>
                         <div class="stat-value">${data.distance} cm</div>
                     </div>
                     
                     <div class="stat-item">
-                        <div class="stat-label"><i class="fas fa-recycle"></i> Trash Type</div>
+                        <div class="stat-icon"><i class="fas fa-recycle"></i></div>
+                        <div class="stat-label">Trash Type</div>
                         <div class="stat-value">${data.trash_type}</div>
                     </div>
                     
                     <div class="stat-item">
-                        <div class="stat-label"><i class="fas fa-chart-line"></i> Confidence</div>
+                        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="stat-label">Confidence</div>
                         <div class="stat-value">${data.confidence}%</div>
                     </div>
                     
                     <div class="stat-item">
-                        <div class="stat-label"><i class="fas fa-id-card"></i> Device ID</div>
+                        <div class="stat-icon"><i class="fas fa-id-card"></i></div>
+                        <div class="stat-label">Device ID</div>
                         <div class="stat-value">${data.device_id}</div>
                     </div>
                     
                     <div class="stat-item">
-                        <div class="stat-label"><i class="fas fa-hashtag"></i> Measurement #</div>
+                        <div class="stat-icon"><i class="fas fa-hashtag"></i></div>
+                        <div class="stat-label">Measurement</div>
                         <div class="stat-value">${data.measurement_id}</div>
                     </div>
                     
                     <div class="stat-item">
-                        <div class="stat-label"><i class="fas fa-clock"></i> Last Update</div>
-                        <div class="stat-value">${data.last_update}</div>
+                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                        <div class="stat-label">Last Update</div>
+                        <div class="stat-value">${formatTime(data.last_update)}</div>
                     </div>
                 </div>
             `;
@@ -366,108 +740,175 @@
             // Update JSON display
             document.getElementById('jsonData').textContent = 
                 JSON.stringify(data, null, 2);
-            
-            // Update status
-            document.getElementById('statusDot').className = 'status-dot status-online';
-            document.getElementById('statusText').textContent = 
-                `Connected via JSONP • Updated: ${new Date().toLocaleTimeString()}`;
-            
-            // Update timestamp
-            document.getElementById('lastUpdate').textContent = 
-                `Last update: ${new Date().toLocaleTimeString()}`;
         }
         
-        // ===== SHOW ERROR =====
-        function showError(message, method) {
+        function updateStatus(message, status) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            
+            dot.className = `status-dot status-${status}`;
+            text.textContent = message;
+        }
+        
+        function updateMethodInfo() {
+            document.getElementById('methodInfo').textContent = 
+                `Method: ${currentMethod} | Device: ${isMobile ? 'Mobile' : 'Desktop'}`;
+        }
+        
+        function updateTimestamp() {
+            const now = new Date().toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('lastUpdate').textContent = 
+                `Last update: ${now}`;
+        }
+        
+        // ===== ERROR HANDLING =====
+        function showError(message) {
             document.getElementById('statusCard').innerHTML = `
-                <div style="text-align: center; padding: 30px;">
-                    <i class="fas fa-exclamation-triangle" style="color: #e53e3e; font-size: 48px; margin-bottom: 20px;"></i>
-                    <h2 style="color: #c53030;">Connection Error</h2>
-                    <p style="margin: 10px 0;">${message}</p>
-                    <p style="margin: 10px 0; color: #718096;">Method: ${method}</p>
-                    <div style="background: #fff5f5; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: left;">
-                        <p><strong>Try:</strong></p>
-                        <ol style="margin-left: 20px;">
-                            <li>Check ESP32 is running</li>
-                            <li>Verify ngrok is active</li>
-                            <li>Refresh this page</li>
-                            <li>Check Flask server logs</li>
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fas fa-exclamation-triangle" 
+                       style="color: #e53e3e; font-size: 2rem; margin-bottom: 15px;"></i>
+                    <h3 style="color: #c53030; margin-bottom: 10px;">Connection Error</h3>
+                    <p style="margin-bottom: 15px; color: #718096;">${message}</p>
+                    
+                    ${isMobile ? `
+                    <div style="background: #fff5f5; padding: 15px; border-radius: 10px; text-align: left; margin-top: 15px;">
+                        <p style="font-weight: bold; margin-bottom: 8px;">Mobile Tips:</p>
+                        <ol style="margin-left: 20px; font-size: 0.9rem;">
+                            <li>Switch to WiFi for better connection</li>
+                            <li>Disable content blockers</li>
+                            <li>Try refreshing the page</li>
+                            <li>Check if ngrok is running</li>
                         </ol>
                     </div>
+                    ` : ''}
                 </div>
             `;
             
-            document.getElementById('statusDot').className = 'status-dot status-offline';
-            document.getElementById('statusText').textContent = `Disconnected • ${message}`;
-            document.getElementById('jsonData').textContent = `Error: ${message}\nMethod: ${method}`;
+            document.getElementById('jsonData').textContent = 
+                `Error: ${message}\n\nTroubleshooting:\n1. Check ESP32 power\n2. Verify ngrok URL\n3. Check mobile network`;
         }
         
-        // ===== MAIN FETCH FUNCTION =====
-        let retryCount = 0;
+        function showOfflineError() {
+            document.getElementById('statusCard').innerHTML = `
+                <div style="text-align: center; padding: 30px;">
+                    <i class="fas fa-wifi-slash" 
+                       style="color: #a0aec0; font-size: 2.5rem; margin-bottom: 15px;"></i>
+                    <h3 style="color: #718096;">You're Offline</h3>
+                    <p style="margin: 10px 0; color: #a0aec0;">No internet connection detected</p>
+                    
+                    ${lastData ? `
+                    <div style="margin-top: 20px; padding: 15px; background: #f7fafc; border-radius: 10px;">
+                        <p style="font-weight: bold; margin-bottom: 10px;">Last Known Data:</p>
+                        <p>Distance: ${lastData.distance} cm</p>
+                        <p>Status: ${lastData.bin_full ? 'FULL' : 'OK'}</p>
+                        <p>Updated: ${formatTime(lastData.last_update)}</p>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            updateStatus('Offline', 'offline');
+        }
         
-        async function fetchData() {
-            try {
-                console.log(`Attempt ${retryCount + 1}: Trying JSONP...`);
-                
-                // Try JSONP first (works with GitHub Pages)
-                const data = await fetchDataJSONP();
-                
-                updateDisplay(data);
-                retryCount = 0; // Reset retry count on success
-                
-            } catch (jsonpError) {
-                console.log('JSONP failed, trying regular fetch...');
-                
-                try {
-                    // Fallback to regular fetch
-                    const data = await fetchDataRegular();
-                    updateDisplay(data);
-                    retryCount = 0;
-                    
-                } catch (fetchError) {
-                    retryCount++;
-                    
-                    if (retryCount <= CONFIG.MaxRetries) {
-                        console.log(`Retry ${retryCount}/${CONFIG.MaxRetries} in ${CONFIG.RetryDelay}ms...`);
-                        showError(`${fetchError.message} (Retry ${retryCount}/${CONFIG.MaxRetries})`, 'JSONP -> Fetch');
-                        
-                        // Retry after delay
-                        setTimeout(fetchData, CONFIG.RetryDelay);
-                    } else {
-                        showError(`${fetchError.message} - All methods failed`, 'JSONP & Fetch');
-                        console.error('All connection methods failed:', fetchError);
-                    }
-                }
+        // ===== UTILITY FUNCTIONS =====
+        function formatTime(timestamp) {
+            if (!timestamp) return 'Unknown';
+            return timestamp.split(' ')[1] || timestamp;
+        }
+        
+        function handleOnline() {
+            isOnline = true;
+            updateStatus('Back online, reconnecting...', 'connecting');
+            setTimeout(fetchData, 1000);
+        }
+        
+        function handleOffline() {
+            isOnline = false;
+            showOfflineError();
+        }
+        
+        function reconnect() {
+            retryCount = 0;
+            fetchData();
+        }
+        
+        function switchMethod() {
+            const methods = ['Auto', 'JSONP', 'Fetch', 'XHR'];
+            const currentIndex = methods.indexOf(currentMethod);
+            currentMethod = methods[(currentIndex + 1) % methods.length];
+            
+            updateMethodInfo();
+            updateStatus(`Switched to ${currentMethod}`, 'connecting');
+            retryCount = 0;
+            fetchData();
+        }
+        
+        function clearData() {
+            if (confirm('Clear displayed data?')) {
+                document.getElementById('statusCard').innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-spinner spinner"></i>
+                        <p>Cleared. Fetching fresh data...</p>
+                    </div>
+                `;
+                document.getElementById('jsonData').textContent = 'Data cleared...';
+                retryCount = 0;
+                fetchData();
             }
         }
         
-        // ===== INITIALIZE =====
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Smart Trash Monitor initialized');
-            console.log('API URL:', CONFIG.NGrokURL);
-            console.log('Using JSONP method for GitHub Pages');
+        function startAutoUpdates() {
+            if (updateTimer) clearInterval(updateTimer);
+            updateTimer = setInterval(fetchData, CONFIG.UpdateInterval);
+        }
+        
+        function setupPullToRefresh() {
+            if (!isMobile) return;
             
-            // Initial fetch
-            fetchData();
+            let startY = 0;
             
-            // Set up periodic updates
-            setInterval(fetchData, CONFIG.UpdateInterval);
+            document.addEventListener('touchstart', e => {
+                startY = e.touches[0].clientY;
+            }, { passive: true });
             
-            // Manual refresh on spacebar
-            document.addEventListener('keydown', (e) => {
-                if (e.code === 'Space' || e.code === 'KeyR') {
-                    e.preventDefault();
+            document.addEventListener('touchend', e => {
+                const endY = e.changedTouches[0].clientY;
+                if (startY - endY > 100 && window.scrollY === 0) {
+                    // Pulled down from top
                     fetchData();
+                    showPullFeedback();
                 }
-            });
+            }, { passive: true });
+        }
+        
+        function showPullFeedback() {
+            const feedback = document.createElement('div');
+            feedback.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Refreshing...';
+            feedback.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--primary);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 20px;
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
             
-            // Export for debugging
-            window.debug = {
-                refresh: fetchData,
-                testJSONP: fetchDataJSONP,
-                testFetch: fetchDataRegular
-            };
-        });
+            document.body.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 2000);
+        }
+        
+        // ===== SERVICE WORKER FOR OFFLINE SUPPORT =====
+        if ('serviceWorker' in navigator && isMobile) {
+            navigator.serviceWorker.register('sw.js').catch(console.error);
+        }
     </script>
 </body>
 </html>

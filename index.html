@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trash Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        h1 { color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        .card { background: #f7fafc; padding: 25px; border-radius: 15px; margin-bottom: 20px; border-left: 5px solid; }
+        .card.full { border-left-color: #e53e3e; background: #fff5f5; }
+        .card.ok { border-left-color: #38a169; background: #f0fff4; }
+        .status { font-size: 28px; font-weight: bold; margin: 10px 0; }
+        .json { background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; overflow-x: auto; }
+        .loading { text-align: center; padding: 40px; color: #718096; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗑️ Smart Trash Monitor</h1>
+        
+        <div id="statusCard" class="card">
+            <div class="loading">
+                <div style="font-size: 24px;">⏳</div>
+                <p>Connecting to ESP32...</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Raw Data</h3>
+            <div class="json">
+                <pre id="jsonData">Waiting for data...</pre>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; color: #718096;">
+            <p>Auto-refreshes every 3 seconds</p>
+            <p id="lastUpdate">Last update: Never</p>
+        </div>
+    </div>
+    
+    <script>
+        // GitHub Pages works with ngrok directly!
+        const API_URL = "https://zachariah-multiphasic-unidiomatically.ngrok-free.dev/api/trash-data";
+        
+        async function fetchData() {
+            try {
+                const response = await fetch(API_URL, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                
+                // Update status card
+                const statusCard = document.getElementById('statusCard');
+                statusCard.className = data.bin_full ? 'card full' : 'card ok';
+                statusCard.innerHTML = `
+                    <h2>Bin Status</h2>
+                    <div class="status">${data.bin_full ? '🚨 FULL' : '✅ OK'}</div>
+                    <p><strong>Distance:</strong> ${data.distance} cm</p>
+                    <p><strong>Trash Type:</strong> ${data.trash_type}</p>
+                    <p><strong>Confidence:</strong> ${data.confidence}%</p>
+                    <p><strong>Device ID:</strong> ${data.device_id}</p>
+                    <p><strong>Measurement #:</strong> ${data.measurement_id}</p>
+                `;
+                
+                // Update JSON
+                document.getElementById('jsonData').textContent = 
+                    JSON.stringify(data, null, 2);
+                
+                // Update timestamp
+                const now = new Date().toLocaleTimeString();
+                document.getElementById('lastUpdate').textContent = 
+                    `Last update: ${now}`;
+                    
+            } catch (error) {
+                document.getElementById('statusCard').innerHTML = `
+                    <div style="color: #e53e3e;">
+                        <h2>❌ Connection Error</h2>
+                        <p>${error.message}</p>
+                        <p>Make sure:</p>
+                        <ol style="text-align: left; margin: 10px 20px;">
+                            <li>ESP32 is running</li>
+                            <li>ngrok is active</li>
+                            <li>Flask server is running</li>
+                        </ol>
+                    </div>
+                `;
+            }
+        }
+        
+        // Initial fetch
+        fetchData();
+        
+        // Update every 3 seconds
+        setInterval(fetchData, 3000);
+        
+        // Manual refresh button (optional)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'r' || e.key === 'R') fetchData();
+        });
+    </script>
+</body>
+</html>

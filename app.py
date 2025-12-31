@@ -62,4 +62,5 @@ if __name__ == "__main__":
     print("🌐 Flask Server with JSONP Support")
     print("📍 Regular JSON: http://localhost:5000/api/trash-data")
     print("📍 JSONP Example: http://localhost:5000/api/trash-data?callback=myFunction")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    context = ('cert.pem', 'key.pem')  # SSL certificate files
+    app.run(host="0.0.0.0", port=5000, debug=True, ssl_context='adhoc')  # adhoc for self-signed

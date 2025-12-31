@@ -62,5 +62,14 @@ if __name__ == "__main__":
     print("🌐 Flask Server with JSONP Support")
     print("📍 Regular JSON: http://localhost:5000/api/trash-data")
     print("📍 JSONP Example: http://localhost:5000/api/trash-data?callback=myFunction")
-    context = ('cert.pem', 'key.pem')  # SSL certificate files
-    app.run(host="0.0.0.0", port=5000, debug=True, ssl_context='adhoc')  # adhoc for self-signed
+    
+    # ===== CHOOSE ONE OF THESE OPTIONS =====
+    
+    # Option 1: Regular HTTP (works with ngrok)
+    app.run(host="0.0.0.0", port=5000, debug=True)
+    
+    # Option 2: HTTPS with self-signed certificate (for mobile testing)
+    # app.run(host="0.0.0.0", port=5000, debug=True, ssl_context='adhoc')
+    
+    # Option 3: HTTPS with custom certificates (if you have cert.pem and key.pem)
+    # app.run(host="0.0.0.0", port=5000, debug=True, ssl_context=('cert.pem', 'key.pem'))
